@@ -18,6 +18,17 @@ else
 	cd build && make
 endif
 
+example:
+	@mkdir -p build
+	@mkdir -p bin
+	cd build && cmake $(CMAKE_FLAGS) -DMDC2250_BUILD_EXAMPLES=1 ..
+ifneq ($(MAKE),)
+	cd build && $(MAKE)
+else
+	cd build && make
+endif
+	cd bin && ./mdc2250_example
+
 clean:
 	-cd build && make clean
 	rm -rf build bin lib doc/html
