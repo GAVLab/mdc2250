@@ -132,91 +132,96 @@ namespace configitem {
   } ConfigItem;
 }
 
+// std::pair<int, std::string> map_data[] = {
+//     std::make_pair(1, "a"),
+//     std::make_pair(2, "b"),
+//     std::make_pair(3, "c")
+// };
+// 
+// std::map<int, std::string> my_map(map_data,
+//     map_data + sizeof map_data / sizeof map_data[0]);
+
 // Reverse enum map for error reporting
-std::map<int, std::string> create_config_names() {
-  std::map<int, std::string> m;
-  m[1] = "_CAD";
-  m[2] = "_OVL";
-  m[3] = "_UVL";
-  m[4] = "_THLD";
-  m[5] = "_MXMD";
-  m[6] = "_PWMF";
-  m[7] = "_CPRI";
-  m[8] = "_RWD";
-  m[9] = "_ECHOF";
-  m[10] = "_PMS";
-  m[11] = "_ACS";
-  m[12] = "_AMS";
-  m[13] = "_CLIN";
-  m[14] = "_DFC";
-  m[15] = "_DINA";
-  m[16] = "_DINL";
-  m[17] = "_DOA";
-  m[18] = "_DOL";
-  m[19] = "_AMOD";
-  m[20] = "_AMIN";
-  m[21] = "_AMAX";
-  m[22] = "_ACTR";
-  m[23] = "_ADB";
-  m[24] = "_ALIN";
-  m[25] = "_AINA";
-  m[26] = "_AMINA";
-  m[27] = "_AMAXA";
-  m[28] = "_APOL";
-  m[29] = "_PMOD";
-  m[30] = "_PMIN";
-  m[31] = "_PMAX";
-  m[32] = "_PCTR";
-  m[33] = "_PDB";
-  m[34] = "_PLIN";
-  m[35] = "_PINA";
-  m[36] = "_PMINA";
-  m[37] = "_PMAXA";
-  m[38] = "_PPOL";
-  m[39] = "_MMOD";
-  m[40] = "_MXPF";
-  m[41] = "_MXPR";
-  m[42] = "_ALIM";
-  m[43] = "_ATRIG";
-  m[44] = "_ATGA";
-  m[45] = "_ATGD";
-  m[46] = "_KP";
-  m[47] = "_KI";
-  m[48] = "_KD";
-  m[49] = "_PIDM";
-  m[50] = "_ICAP";
-  m[51] = "_MAC";
-  m[52] = "_MDEC";
-  m[53] = "_MVEL";
-  m[54] = "_MXRPM";
-  m[54] = "_MXTRN";
-  m[55] = "_CLERD";
-  m[56] = "_BPOL";
-  m[57] = "_BLSTD";
-  m[58] = "_BLFB";
-  m[59] = "_BHOME";
-  m[60] = "_BLL";
-  m[61] = "_BHL";
-  m[62] = "_BLLA";
-  m[63] = "_BHLA";
-  m[64] = "_SXC";
-  m[65] = "_SXM";
-  m[72] = "_EMOD";
-  m[73] = "_EPPR";
-  m[74] = "_ELL";
-  m[75] = "_EHL";
-  m[76] = "_ELLA";
-  m[77] = "_EHLA";
-  m[78] = "_KPC1";
-  m[79] = "_KPC2";
-  m[80] = "_KIC1";
-  m[81] = "_KIC2";
-  m[82] = "_KDC1";
-  m[83] = "_KDC2";
-  m[84] = "_EHOME";
-  return m;
-}
-std::map<int, std::string> ConfigItemNames = create_config_names();
+// std::map<int, std::string> ConfigItemNames = boost::assign::map_list_of
+//   (1, "_CAD")
+//   (2, "_OVL")
+//   (3, "_UVL")
+//   (4, "_THLD")
+//   (5, "_MXMD")
+//   (6, "_PWMF")
+//   (7, "_CPRI")
+//   (8, "_RWD")
+//   (9, "_ECHOF")
+//   (10, "_PMS")
+//   (11, "_ACS")
+//   (12, "_AMS")
+//   (13, "_CLIN")
+//   (14, "_DFC")
+//   (15, "_DINA")
+//   (16, "_DINL")
+//   (17, "_DOA")
+//   (18, "_DOL")
+//   (19, "_AMOD")
+//   (20, "_AMIN")
+//   (21, "_AMAX")
+//   (22, "_ACTR")
+//   (23, "_ADB")
+//   (24, "_ALIN")
+//   (25, "_AINA")
+//   (26, "_AMINA")
+//   (27, "_AMAXA")
+//   (28, "_APOL")
+//   (29, "_PMOD")
+//   (30, "_PMIN")
+//   (31, "_PMAX")
+//   (32, "_PCTR")
+//   (33, "_PDB")
+//   (34, "_PLIN")
+//   (35, "_PINA")
+//   (36, "_PMINA")
+//   (37, "_PMAXA")
+//   (38, "_PPOL")
+//   (39, "_MMOD")
+//   (40, "_MXPF")
+//   (41, "_MXPR")
+//   (42, "_ALIM")
+//   (43, "_ATRIG")
+//   (44, "_ATGA")
+//   (45, "_ATGD")
+//   (46, "_KP")
+//   (47, "_KI")
+//   (48, "_KD")
+//   (49, "_PIDM")
+//   (50, "_ICAP")
+//   (51, "_MAC")
+//   (52, "_MDEC")
+//   (53, "_MVEL")
+//   (54, "_MXRPM")
+//   (54, "_MXTRN")
+//   (55, "_CLERD")
+//   (56, "_BPOL")
+//   (57, "_BLSTD")
+//   (58, "_BLFB")
+//   (59, "_BHOME")
+//   (60, "_BLL")
+//   (61, "_BHL")
+//   (62, "_BLLA")
+//   (63, "_BHLA")
+//   (64, "_SXC")
+//   (65, "_SXM")
+//   (72, "_EMOD")
+//   (73, "_EPPR")
+//   (74, "_ELL")
+//   (75, "_EHL")
+//   (76, "_ELLA")
+//   (77, "_EHLA")
+//   (78, "_KPC1")
+//   (79, "_KPC2")
+//   (80, "_KIC1")
+//   (81, "_KIC2")
+//   (82, "_KDC1")
+//   (83, "_KDC2")
+//   (84, "_EHOME");
 
 namespace commanditem {
   /*!
@@ -243,27 +248,28 @@ namespace commanditem {
     _MGO = 15     /*!< Undocumented */
   } CommandItem;
 }
-// Reverse enum map for error reporting
-std::map<int, std::string> create_command_names() {
-  std::map<int, std::string> m;
-  m[0] = "_GO";
-  m[1] = "_MOTCMD";
-  m[2] = "_MOTPOS";
-  m[3] = "_MOTVEL";
-  m[4] = "_SENCNTR";
-  m[5] = "_SBLCNTR";
-  m[6] = "_VAR";
-  m[7] = "_ACCEL";
-  m[8] = "_DECEL";
-  m[9] = "_DOUT";
-  m[10] = "_DSET";
-  m[11] = "_DRES";
-  m[13] = "_HOME";
-  m[14] = "_ESTOP";
-  m[15] = "_MGO";
-  return m;
-}
-std::map<int, std::string> CommandItemNames = create_command_names();
+
+// // Reverse enum map for error reporting
+// std::map<int, std::string> create_command_names() {
+//   std::map<int, std::string> m;
+//   m[0] = "_GO";
+//   m[1] = "_MOTCMD";
+//   m[2] = "_MOTPOS";
+//   m[3] = "_MOTVEL";
+//   m[4] = "_SENCNTR";
+//   m[5] = "_SBLCNTR";
+//   m[6] = "_VAR";
+//   m[7] = "_ACCEL";
+//   m[8] = "_DECEL";
+//   m[9] = "_DOUT";
+//   m[10] = "_DSET";
+//   m[11] = "_DRES";
+//   m[13] = "_HOME";
+//   m[14] = "_ESTOP";
+//   m[15] = "_MGO";
+//   return m;
+// }
+// std::map<int, std::string> CommandItemNames = create_command_names();
 
 namespace operatingitem {
   /*!
@@ -305,41 +311,42 @@ namespace operatingitem {
     _LOCKED = 29    /*!< Lock status */
   } OperatingItem;
 }
-// Reverse enum map for error reporting
-std::map<int, std::string> create_operating_names() {
-  std::map<int, std::string> m;
-  m[0] = "_MOTAMPS";
-  m[1] = "_MOTCMD";
-  m[2] = "_MOTPWR";
-  m[3] = "_ABSPEED";
-  m[4] = "_ABCNTR";
-  m[5] = "_BLCNTR";
-  m[6] = "_VAR";
-  m[7] = "_RELSPEED";
-  m[8] = "_RELCNTR";
-  m[9] = "_BLRCNTR";
-  m[10] = "_BLSPEED";
-  m[11] = "_BLRSPEED";
-  m[13] = "_BATAMPS";
-  m[14] = "_VOLTS";
-  m[15] = "_DIGIN";
-  m[16] = "_DIN";
-  m[17] = "_ANAIN";
-  m[18] = "_PLSIN";
-  m[19] = "_TEMP";
-  m[20] = "_FEEDBK";
-  m[21] = "_STFLAG";
-  m[22] = "_FLTFLAG";
-  m[23] = "_DIGOUT";
-  m[24] = "_LPERR";
-  m[25] = "_CMDSER";
-  m[26] = "_CMDANA";
-  m[27] = "_CMDPLS";
-  m[28] = "_TIME";
-  m[29] = "_LOCKED";
-  return m;
-}
-std::map<int, std::string> OperatingItemNames = create_operating_names();
+
+// // Reverse enum map for error reporting
+// std::map<int, std::string> create_operating_names() {
+//   std::map<int, std::string> m;
+//   m[0] = "_MOTAMPS";
+//   m[1] = "_MOTCMD";
+//   m[2] = "_MOTPWR";
+//   m[3] = "_ABSPEED";
+//   m[4] = "_ABCNTR";
+//   m[5] = "_BLCNTR";
+//   m[6] = "_VAR";
+//   m[7] = "_RELSPEED";
+//   m[8] = "_RELCNTR";
+//   m[9] = "_BLRCNTR";
+//   m[10] = "_BLSPEED";
+//   m[11] = "_BLRSPEED";
+//   m[13] = "_BATAMPS";
+//   m[14] = "_VOLTS";
+//   m[15] = "_DIGIN";
+//   m[16] = "_DIN";
+//   m[17] = "_ANAIN";
+//   m[18] = "_PLSIN";
+//   m[19] = "_TEMP";
+//   m[20] = "_FEEDBK";
+//   m[21] = "_STFLAG";
+//   m[22] = "_FLTFLAG";
+//   m[23] = "_DIGOUT";
+//   m[24] = "_LPERR";
+//   m[25] = "_CMDSER";
+//   m[26] = "_CMDANA";
+//   m[27] = "_CMDPLS";
+//   m[28] = "_TIME";
+//   m[29] = "_LOCKED";
+//   return m;
+// }
+// std::map<int, std::string> OperatingItemNames = create_operating_names();
 
 }
 

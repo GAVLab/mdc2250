@@ -8,6 +8,10 @@ inline void defaultExceptionCallback(const std::exception &error) {
   throw(error);
 }
 
+void mdc2250::sleep_ms(int milliseconds) {
+  sleepms(milliseconds);
+}
+
 using namespace mdc2250;
 using namespace configitem;
 using namespace commanditem;
@@ -21,7 +25,7 @@ MDC2250::MDC2250() {
 }
 
 MDC2250::~MDC2250() {
-  // do nothing for now
+  this->disconnect();
 }
 
 void MDC2250::connect(std::string port) {
@@ -48,6 +52,10 @@ void MDC2250::connect(std::string port) {
       handle_exc(UnknownErrorCodeException(status));
       break;
   }
+}
+
+void MDC2250::disconnect() {
+  roboteq_device.Disconnect();
 }
 
 void MDC2250::setConfig(ConfigItem cfg, int value, int index) {

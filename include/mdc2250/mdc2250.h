@@ -46,6 +46,7 @@
 
 // Boost Headers (system or from vender/*)
 #include "boost/function.hpp"
+// #include "boost/assign.hpp"
 
 // Roboteq API Headers
 #include "roboteq_api/ErrorCodes.h"
@@ -58,6 +59,11 @@ namespace mdc2250 {
 
 /***** Function Typedefs *****/
 typedef boost::function<void(const std::exception&)> ExceptionCallback;
+
+/*!
+ * Sleeps for given number of milliseconds.
+ */
+void sleep_ms(int milliseconds);
 
 /*!
  * Represents an MDC2250 Device and provides and interface to it.
@@ -173,7 +179,7 @@ public:
 
   virtual const char* what() const throw() {
     std::stringstream ss;
-    ss << "Error getting value " << OperatingItemNames[this->op];
+    ss << "Error getting value " << this->op;//OperatingItemNames[this->op];
     ss << " at index " << this->index;
     ss << " from the MDC2250: " << this->e_what;
     return ss.str().c_str();
@@ -193,7 +199,7 @@ public:
 
   virtual const char* what() const throw() {
     std::stringstream ss;
-    ss << "Error setting command " << CommandItemNames[this->cmd];
+    ss << "Error setting command " << this->cmd;//CommandItemNames[this->cmd];
     ss << " at index " << this->index << " to " << this->value;
     ss << " on the MDC2250: " << this->e_what;
     return ss.str().c_str();
@@ -213,7 +219,7 @@ public:
 
   virtual const char* what() const throw() {
     std::stringstream ss;
-    ss << "Error getting " << ConfigItemNames[this->cfg];
+    ss << "Error getting " << this->cfg;//ConfigItemNames[this->cfg];
     ss << " at index " << this->index;
     ss << " from the MDC2250: " << this->e_what;
     return ss.str().c_str();
@@ -233,7 +239,7 @@ public:
 
   virtual const char* what() const throw() {
     std::stringstream ss;
-    ss << "Error setting " << ConfigItemNames[this->cfg];
+    ss << "Error setting " << this->cfg;//ConfigItemNames[this->cfg];
     ss << " at index " << this->index << " to " << this->value;
     ss << " on the MDC2250: " << this->e_what;
     return ss.str().c_str();

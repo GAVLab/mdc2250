@@ -7,7 +7,7 @@ project(mdc2250)
 
 # Use clang if available
 IF(EXISTS /usr/bin/clang)
-  set(CMAKE_CXX_COMPILER /usr/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 ENDIF(EXISTS /usr/bin/clang)
 
 option(MDC2250_BUILD_TESTS "Build all of the mdc2250 tests." OFF)
@@ -69,31 +69,31 @@ add_library(mdc2250 ${MDC2250_SRCS})
 
 # If specified
 IF(MDC2250_BUILD_EXAMPLES)
-    # Compile the Example program
-    add_executable(mdc2250_example examples/mdc2250_example.cpp)
-    # Link the Test program to the mdc2250 library
-    target_link_libraries(mdc2250_example mdc2250)
+  # Compile the Example program
+  add_executable(mdc2250_example examples/mdc2250_example.cc)
+  # Link the Test program to the mdc2250 library
+  target_link_libraries(mdc2250_example mdc2250)
 ENDIF(MDC2250_BUILD_EXAMPLES)
 
 ## Build Tests
 
 # If specified
 IF(MDC2250_BUILD_TESTS)
-    # Find Google Test                                                                                                                                                               
-    enable_testing()
-    find_package(GTest REQUIRED)
-    include_directories(${GTEST_INCLUDE_DIRS})
-    
-    # Compile the Test program
-    add_executable(mdc2250_tests test/mdc2250_tests.cpp)
-    # Link the Test program to the mdc2250 library
-    target_link_libraries(mdc2250_tests mdc2250 ${GTEST_BOTH_LIBRARIES})
-    add_test(AllTestsIntest_mdc2250 mdc2250_tests)
+  # Find Google Test                                                                                                                                                               
+  enable_testing()
+  find_package(GTest REQUIRED)
+  include_directories(${GTEST_INCLUDE_DIRS})
+  
+  # Compile the Test program
+  add_executable(mdc2250_tests tests/mdc2250_tests.cc)
+  # Link the Test program to the mdc2250 library
+  target_link_libraries(mdc2250_tests mdc2250 ${GTEST_BOTH_LIBRARIES})
+  add_test(AllTestsIntest_mdc2250 mdc2250_tests)
 ENDIF(MDC2250_BUILD_TESTS)
 
 # Configure make install
 IF(NOT CMAKE_INSTALL_PREFIX)
-    SET(CMAKE_INSTALL_PREFIX /usr/local)
+  SET(CMAKE_INSTALL_PREFIX /usr/local)
 ENDIF(NOT CMAKE_INSTALL_PREFIX)
 
 ## Install setup
