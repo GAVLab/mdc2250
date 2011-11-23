@@ -87,7 +87,7 @@ void RoboteqDevice::InitPort()
 		return;
 
 	//Get the existing Comm Port Attributes in cwrget
-	int BAUDRATE = B9600;
+	int BAUDRATE = B115200;
 	struct termios newtio;
 	tcgetattr (handle, &newtio);
 
@@ -102,10 +102,10 @@ void RoboteqDevice::InitPort()
 	newtio.c_cflag |= (CLOCAL | CREAD);	/* Select the Local Mode & Enable Receiver through Control options*/
 
 	//Set Data format to 7E1
-	newtio.c_cflag &= ~CSIZE;		/* Mask the Character Size Bits through Control options*/
-	newtio.c_cflag |= CS7;			/* Select Character Size to 7-Bits through Control options*/
-	newtio.c_cflag |= PARENB;		/* Select the Parity Enable through Control options*/
-	newtio.c_cflag &= ~PARODD;		/* Select the Even Parity through Control options*/
+  // newtio.c_cflag &= ~CSIZE;    /* Mask the Character Size Bits through Control options*/
+  // newtio.c_cflag |= CS7;     /* Select Character Size to 7-Bits through Control options*/
+  // newtio.c_cflag |= PARENB;    /* Select the Parity Enable through Control options*/
+  // newtio.c_cflag &= ~PARODD;   /* Select the Even Parity through Control options*/
 
 	//cwrset.c_iflag |= (INPCK|ISTRIP);
 	//cwrset.c_cc[VMIN] = 6;
