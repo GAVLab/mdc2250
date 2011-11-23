@@ -5,6 +5,11 @@ project(mdc2250)
 
 ## Configurations
 
+# Use clang if available
+IF(EXISTS /usr/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/bin/clang)
+ENDIF(EXISTS /usr/bin/clang)
+
 option(MDC2250_BUILD_TESTS "Build all of the mdc2250 tests." OFF)
 option(MDC2250_BUILD_EXAMPLES "Build all of the mdc2250 examples." OFF)
 
@@ -43,7 +48,8 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # Add header files
-set(MDC2250_HEADERS ${PROJECT_SOURCE_DIR}/include/mdc2250/mdc2250.h)
+set(MDC2250_HEADERS ${PROJECT_SOURCE_DIR}/include/mdc2250/mdc2250_types.h)
+list(APPEND MDC2250_HEADERS ${PROJECT_SOURCE_DIR}/include/mdc2250/mdc2250.h)
 IF(WIN32)
   set(ROBOTEQ_API_HEADERS ${ROBOTEQ_API_DIR}/windows/Constants.h
                           ${ROBOTEQ_API_DIR}/windows/ErrorCodes.h
