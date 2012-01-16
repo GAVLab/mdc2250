@@ -57,6 +57,18 @@ set(MDC2250_LINK_LIBS ${Boost_SYSTEM_LIBRARY}
                       ${Boost_FILESYSTEM_LIBRARY}
                       ${Boost_THREAD_LIBRARY})
 
+# Find serial, if it hasn't already been found
+IF(NOT serial_FOUND)
+    find_package(serial REQUIRED)
+ENDIF(NOT serial_FOUND)
+
+if(serial_FOUND)
+  include_directories(${serial_INCLUDE_DIRS})
+  list(APPEND MDC2250_LINK_LIBS ${serial_LIBRARIES})
+else(serial_FOUND)
+  message(FATAL_ERROR "Serial library was not found.")
+endif(serial_FOUND)
+
 ## Build the mdc2250 Library
 
 # Compile the Library
