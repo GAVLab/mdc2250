@@ -22,6 +22,7 @@ using namespace serial;
 MDC2250::MDC2250() {
   // Set default callbacks
   this->handle_exc = defaultExceptionCallback;
+  this->info = defaultInfoCallback;
   cmd_time = 15; // Default to 15 ms
 }
 
