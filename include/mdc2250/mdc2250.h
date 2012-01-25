@@ -46,6 +46,8 @@
 // Boost Headers
 #include "boost/function.hpp"
 
+#define SERIAL_LISTENER_DEBUG 0
+
 // Serial Headers
 #include "serial/serial.h"
 #include "serial/serial_listener.h"
@@ -85,7 +87,7 @@ public:
   /*!
    * Constructs the MDC2250 object.
    */
-  MDC2250();
+  MDC2250(bool debug_mode = false);
   virtual ~MDC2250();
 
   /*!
@@ -94,10 +96,22 @@ public:
    * \param port Defines which serial port to connect to in serial mode.
    * Examples: Linux - "/dev/ttyS0" Windows - "COM1"
    * 
+   * \param watchdog_time size_t that defines how long the motor controller's
+   * watchdog timer should be set to in milliseconds.  A value of 0 will 
+   * deisable the watchdog timer completely.  If you do not disable the 
+   * watchdog timer then you will have to send motor commands periodically to 
+   * prevent the motors from stopping.  Defaults to 1000 ms.
+   * 
+   * \param echo bool true for the echo to be on and false for it to be off.
+   * The echo provides a sortof checksum on commands, but is not necessary and 
+   * turning it off can improve performance.  Defaults to on.
+   * 
    * \throws ConnectionFailedException connection attempt failed.
    * \throws UnknownErrorCodeException unknown error code returned.
    */
-  void connect(std::string port);
+  void connect(std::string port,
+               size_t watchdog_time = 1000,
+               bool echo = true);
 
   /*!
    * Disconnects from the MDC2250 motor controller given a serial port.
@@ -141,6 +155,137 @@ public:
    * \return bool true for success, false for failure.
    */
   bool ping();
+
+  /*!
+   * Resets the controller, this is done on connection.
+   */
+  void reset();
+
+  /*!
+   * Sets the watchdog timer timeout time in milliseconds.
+   * 
+   * \params timeout size_t time in milliseconds for the timeout.  A value of 
+   * 0 will disable the watchdog timer.
+   */
+  void setWatchdog(size_t timeout);
+
+  /*!
+   * Sets the command echoing on or off.
+   * 
+   * \params state bool true will enable echo, false will disable it.
+   */
+  void setEcho(bool state);
+
+  /*!
+   * Sets the emergency stop, motors won't move until estop is cleared.
+   */
+  void estop();
+
+  /*!
+   * Clears the emergency stop, motors won't move until estop is cleared.
+   */
+  void clearEstop();
+
+  /*!
+   * Returns the estop status, true for estopped, false otherwise.
+   * 
+   * \returns bool true means it is estopped, false means it is not
+   */
+  bool isEstopped() {
+    this->detect_emergency_stop_();
+    return this->estop_;
+  }
+
+  /*!
+   * Sets the Telemetry string, rate, and callback.
+   * 
+   * This allows you to set an order of queries to be preiodically sent
+   * automatically by the motor controller and then provided to a callback.
+   * 
+   * Example: my_mdc2250.setTelemetry("CR,V,CR,A", 25, my_callback);
+   *          // This will return CR then wait 25 ms, then V, and so on
+   *          //  calling the callback each time
+   * 
+   * Automatic telemetry will be interrupted by several actions, activating
+   * the estop, changing the echo state, or making an arbitrary query.  If you
+   * wish to deliberately stop the automatic telemetry, then you can make a
+   * call to setTelemetry with an empty string for the telemetry_queries.
+   * 
+   * \params telemetry_queries std::string that describes the telemetry order 
+   * and is a series of queries separated by comma.
+   * 
+   * \params period size_t period in milliseconds between each telemetry 
+   * element being sent by the motor controller.
+   * 
+   * \params callback serial::DataCallback function to be called when new 
+   * telemetry data has arrived.
+   */
+  void setTelemetry(std::string telemetry_queries,
+                    size_t period,
+                    serial::DataCallback callback);
+
+  /*!
+   * Commands a given motor to a given motor effort.
+   * 
+   * From the datasheet:
+   * <pre>
+   *    The G command is used to set the speed or position of a single motor.
+   *    The commands are given in values from -1000 to +1000 and represent a
+   *    power level in open-loop speed mode, desired speed in percent of max 
+   *    RPM in the closed loop speed mode, or a desired relative position in 
+   *    the closed-loop position mode.
+   *    
+   *    Syntax: !G [nn] mm
+   *    
+   *    Where: nn = Motor Channel. May be omitted in single channel
+   *                controllers
+   *           mm = command value in +/-1000 range
+   *    Examples: G 1 500: set motor1 to 500
+   *              G 2 600: set motor2 to 600
+   * </pre>
+   * 
+   * \param motor_index size_t motor channel index 1 or 2
+   * \param motor_effort ssize_t value between -1000 and 1000, defaults to 0
+   * 
+   * \return bool true for success, false for failure.
+   * 
+   * \throws std::invalid_argument
+   */
+  void commandMotor(size_t motor_index, ssize_t motor_effort = 0);
+
+  /*!
+   * Commands both motors given their respective efforts.
+   * 
+   * From the datasheet:
+   * <pre>
+   *    The M command is used to set the speed or position of one or two 
+   *    motors at once. The command can include 1 or 2 parameters to set the 
+   *    speed of one or both motors from sin- gle command. The commands are 
+   *    given in values from -1000 to +1000 and represent a power level in 
+   *    open-loop speed mode, desired speed in percent of max RPM in the 
+   *    closed-loop speed mode, or a desired relative position in the 
+   *    closed-loop position mode. If only one parameter is sent, the value is 
+   *    applied to channel 1. When two parameters follow the runtime command, 
+   *    they apply to the first and the second channel.
+   *    
+   *    Syntax: !M nn [mm]
+   *    
+   *    Where: nn, mm = command value in +/-1000 range
+   *    
+   *    Examples: !M 500: set motor1 to 500
+   *              !M 500 600: set motor1 to 500 and motor2 to 600
+   *              !M 0 600: stop motor1 and set motor2 to 600
+   *              !M 0 0: stop both motors
+   * </pre>
+   * 
+   * \param motor1_effort ssize_t value between -1000 and 1000, defaults to 0
+   * \param motor2_effort ssize_t value between -1000 and 1000, defaults to 0
+   * 
+   * \return bool true for success, false for failure.
+   * 
+   * \throws std::invalid_argument
+   */
+  void commandMotors(ssize_t motor1_effort = 0, ssize_t motor2_effort = 0);
 
   /*!
    * Sets the function to be called when an info logging message occurs.
@@ -214,12 +359,16 @@ public:
 private:
   // Implementation of _issueCommand, used by issueQuery too
   bool _issueCommand(const std::string &command, std::string &failure_reason,
-    const std::string &cmd_type);
+                     const std::string &cmd_type);
   // Function to setup commonly used, persistent filters
   void setupFilters();
+  // Detects the motor controller's echo state
+  void detect_echo_();
+  // Detects the motor controller's estop state
+  void detect_emergency_stop_();
 
   // Time to wait for responses from the device
-  size_t cmd_time;
+  long cmd_time;
 
   // Exception callback handle
   ExceptionCallback handle_exc;
@@ -227,6 +376,11 @@ private:
 
   // Serial port name
   std::string port_;
+
+  // Device Info
+  std::string device_string_;
+  std::string control_unit_;
+  std::string controller_model_;
 
   // Serial port and listener
   serial::Serial         serial_port_;
@@ -236,6 +390,19 @@ private:
   serial::BufferedFilterPtr ack_filter;
   serial::BufferedFilterPtr nak_filter;
   serial::BufferedFilterPtr ping_filter;
+  std::vector<serial::FilterPtr> telemetry_filters_;
+
+  // Connection state
+  bool connected_;
+
+  // Echo setting state
+  bool echo_;
+
+  // Estop state
+  bool estop_;
+
+  // Debug mode
+  bool debug_mode_;
 };
 
 /*!
@@ -254,6 +421,27 @@ public:
   virtual const char * what() const throw() {
     std::stringstream ss;
     ss << "Connecting to the MDC2250: " << this->e_what_;
+    return ss.str().c_str();
+  }
+};
+
+/*!
+ * Exception called when a command or query failed.
+ */
+class CommandFailedException : public std::exception {
+  const std::string command_, e_what_;
+  int error_type_;
+public:
+  CommandFailedException(const std::string &command,
+                         const std::string &e_what, int error_type = 0)
+  : command_(command), e_what_(e_what), error_type_(error_type) {}
+  ~CommandFailedException() throw() {}
+
+  int error_type() {return error_type_;}
+
+  virtual const char * what() const throw() {
+    std::stringstream ss;
+    ss << "Command " << this->command_ << " failed: " << this->e_what_;
     return ss.str().c_str();
   }
 };
