@@ -5,6 +5,8 @@
 
 /***** Inline Functions *****/
 
+namespace mdc2250_ {
+
 inline void unparsedMessages(const std::string &token) {
   std::cout << "Unparsed token(" << token.length() << "): ";
   std::cout << token << std::endl;
@@ -27,7 +29,10 @@ inline void printHex(char * data, int length) {
     printf("\n");
 }
 
+}
+
 using namespace mdc2250;
+using namespace mdc2250_;
 using namespace serial;
 
 // Tokenizes on carriage return or ACK (\x06)
@@ -159,6 +164,8 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
 }
 
 void MDC2250::disconnect() {
+  // E-stop
+  this->serial_port_.write("!EX\r");
   this->listener_.stopListening();
   this->connected_ = false;
 }
@@ -285,6 +292,12 @@ MDC2250::setTelemetry(std::string telemetry_queries,
                       size_t period,
                       serial::DataCallback callback)
 {
+  // Stop the current telemetry if it is running
+  std::string fail_why;
+  if (!this->_issueCommand("# C", fail_why, "query history")) {
+    // Something went wrong
+    throw(CommandFailedException("setTelemetry", fail_why));
+  }
   // Validate the parameters
   std::vector<std::string> queries;
   boost::split(queries, telemetry_queries, boost::is_any_of(","));
@@ -300,15 +313,18 @@ MDC2250::setTelemetry(std::string telemetry_queries,
     std::stringstream ss;
     ss << "In setTelemetry, period must be greater than 0, given: ";
     ss << period;
-    throw(std::invalid_argument(ss.str()));
+    // throw(std::invalid_argument(ss.str()));
+    std::cout << ss.str() << std::endl;
+    return;
   }
   // Remove old filters
-  telemetry_filters_.clear();
-  // Stop the current telemetry if it is running
-  std::string fail_why;
-  if (!this->_issueCommand("# C", fail_why, "query history")) {
-    // Something went wrong
-    throw(CommandFailedException("setTelemetry", fail_why));
+  {
+    std::vector<serial::FilterPtr>::iterator i;
+    for (i == telemetry_filters_.begin(); i != telemetry_filters_.end(); i++)
+    {
+      this->listener_.removeFilter((*i));
+    }
+    telemetry_filters_.clear();
   }
   // Run each query once, in order
   std::vector<std::string>::iterator it;
@@ -328,12 +344,13 @@ MDC2250::setTelemetry(std::string telemetry_queries,
   std::vector<std::string> key;
   for (it = queries.begin(); it != queries.end(); ++it) {
     // Make sure there are no duplicate filters
-    if (std::find(key.begin(), key.end(), (*it)) != key.end()) {
+    if (std::find(key.begin(), key.end(), (*it)) == key.end()) {
       // Not a filter for it yet
       key.push_back((*it));
       // Add a fitler for it
       FilterPtr filt =
         listener_.createFilter(SerialListener::startsWith((*it)), callback);
+      telemetry_filters_.push_back(filt);
     }
   }
   // Now that all of the queries have run once and filters have been made

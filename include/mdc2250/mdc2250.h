@@ -192,7 +192,7 @@ public:
    * \returns bool true means it is estopped, false means it is not
    */
   bool isEstopped() {
-    this->detect_emergency_stop_();
+    // this->detect_emergency_stop_();
     return this->estop_;
   }
 

@@ -12,7 +12,7 @@ int run() {
   // Disable echo
   my_mdc2250.setEcho(false);
   // Disable watchdog
-  my_mdc2250.setWatchdog(0);
+  my_mdc2250.setWatchdog(10000);
 
   // Setup telemetry
   my_mdc2250.setTelemetry("C,V,C,A", 25, telemetry_callback);
@@ -27,6 +27,7 @@ int run() {
   boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   // Move both motors for 1 second, but estop (they shouldn't move)
   my_mdc2250.commandMotors(-1000, 1000);
+  std::cout << "E-stopping!" << std::endl;
   my_mdc2250.estop();
   boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   // Stop both motors for 1 second, and clear the estop
