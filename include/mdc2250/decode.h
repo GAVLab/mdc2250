@@ -48,7 +48,7 @@
 
 namespace mdc2250 {
 
-namespace responses {
+namespace queries {
   /* 
    * This is an enumeration of the possible types of response from queries.
    * 
@@ -87,11 +87,12 @@ namespace responses {
     control_unit_type_and_controller_model,
     volts,
     user_variable,
-    unknown
-  } ResponseType;
-} // responses namespace
+    unknown,
+    any_query
+  } QueryType;
+} // queries namespace
 
-using responses;
+using queries;
 
 bool
 starts_with(const std::string str, const std::string prefix) {
@@ -110,7 +111,7 @@ split(const std::string str, const std::string &delimeter,
   boost::split(strs, str, delimeter);
 }
 
-responses::ResponseType
+QueryType
 detect_response_type(const std::string &raw) {
   switch(raw[0]) {
     case 'A':
@@ -177,10 +178,10 @@ detect_response_type(const std::string &raw) {
 }
 
 /*!
- * Returns the corresponding std::string given a responses::ResponseType.
+ * Returns the corresponding std::string given a QueryType.
  */
 std::string
-response_type_to_string(responses::ResponseType res) {
+response_type_to_string(QueryType res) {
   switch (res) {
     case motor_amps: return "motor_amps";
     case analog_input: return "analog_input";
@@ -229,11 +230,11 @@ response_type_to_string(responses::ResponseType res) {
 class DecodingException : public std::exception {
   const std::string e_what_;
   const std::string raw_;
-  const responses::ResponseType res_;
+  const QueryType res_;
 public:
   DecodingException(const std::string &e_what = "",
                     const std::string &raw = "",
-                    responses::ResponseType res = responses::unknown)
+                    QueryType res = unknown)
   : e_what_(e_what), raw_(raw), res_(res) {}
   ~DecodingException() throw() {}
 
@@ -260,7 +261,7 @@ public:
  */
 size_t
 decode_generic_response(const std::string &raw, std::vector<long> &channels) {
-  responses::ResponseType res = detect_response_type(raw);
+  QueryType res = detect_response_type(raw);
   if (res == unknown) {
     throw(DecodingException("unknown response type", raw, res));
   }
