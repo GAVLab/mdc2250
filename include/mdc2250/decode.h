@@ -92,15 +92,14 @@ namespace queries {
   } QueryType;
 } // queries namespace
 
-using namespace queries;
-
 bool
 starts_with(const std::string str, const std::string prefix) {
   return str.substr(0,prefix.length()) == prefix;
 }
 
-QueryType
+queries::QueryType
 detect_response_type(const std::string &raw) {
+  using namespace queries;
   switch(raw[0]) {
     case 'A':
       if (starts_with(raw, "A=")) return motor_amps;
@@ -169,7 +168,8 @@ detect_response_type(const std::string &raw) {
  * Returns the corresponding std::string given a QueryType.
  */
 std::string
-response_type_to_string(QueryType res) {
+response_type_to_string(queries::QueryType res) {
+  using namespace queries;
   switch (res) {
     case motor_amps: return "motor_amps";
     case analog_input: return "analog_input";
@@ -218,11 +218,11 @@ response_type_to_string(QueryType res) {
 class DecodingException : public std::exception {
   const std::string e_what_;
   const std::string raw_;
-  const QueryType res_;
+  const queries::QueryType res_;
 public:
   DecodingException(const std::string &e_what = "",
                     const std::string &raw = "",
-                    QueryType res = unknown)
+                    queries::QueryType res = queries::unknown)
   : e_what_(e_what), raw_(raw), res_(res) {}
   ~DecodingException() throw() {}
 
@@ -249,8 +249,8 @@ public:
  */
 size_t
 decode_generic_response(const std::string &raw, std::vector<long> &channels) {
-  QueryType res = detect_response_type(raw);
-  if (res == unknown) {
+  queries::QueryType res = detect_response_type(raw);
+  if (res == queries::unknown) {
     throw(DecodingException("unknown response type", raw, res));
   }
   std::vector<std::string> strs;
