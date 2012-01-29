@@ -67,6 +67,7 @@ MDC2250::MDC2250(bool debug_mode) {
     this->listener_.setDefaultHandler(unparsedMessages);
   }
   this->listener_.setTokenizer(tokenizer);
+  this->listener_.setExceptionHandler(this->handle_exc);
   this->connected_ = false;
   this->echo_ = false;
   this->estop_ = false;
