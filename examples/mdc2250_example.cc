@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "mdc2250/mdc2250.h"
+#include "mdc2250/decode.h"
 
 void telemetry_callback(const std::string &telemetry) {
   std::cout << "Got telemetry: " << telemetry << std::endl;
@@ -8,14 +9,16 @@ void telemetry_callback(const std::string &telemetry) {
 
 int run() {
   mdc2250::MDC2250 my_mdc2250(true);
-  my_mdc2250.connect("/dev/tty.USA49Wfd124P1.1");
+  my_mdc2250.connect("/dev/tty.USA49Wfd122P1.1");
   // Disable echo
-  my_mdc2250.setEcho(false);
+  my_mdc2250.setEcho(true);
   // Disable watchdog
   my_mdc2250.setWatchdog(10000);
 
   // Setup telemetry
-  my_mdc2250.setTelemetry("C,V,C,A", 25, telemetry_callback);
+  size_t period = 25;
+  my_mdc2250.setTelemetry("C,V,C,A", period, telemetry_callback);
+  my_mdc2250.setTelemetry("C,V,C,A", period, telemetry_callback);
 
   // Move both motors for 4 seconds
   my_mdc2250.commandMotor(1, 1000);
@@ -35,7 +38,7 @@ int run() {
   my_mdc2250.commandMotors(0); // Same thing
   my_mdc2250.clearEstop();
   // Have to redo telemetry after an estop
-  my_mdc2250.setTelemetry("C,V,C,A", 25, telemetry_callback);
+  my_mdc2250.setTelemetry("C,V,C,A", period, telemetry_callback);
   boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   // Move both motors for 4 seconds
   my_mdc2250.commandMotors(-1000, 1000);
