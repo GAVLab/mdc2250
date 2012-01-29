@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cstdio>
 
 /***** Inline Functions *****/
 
