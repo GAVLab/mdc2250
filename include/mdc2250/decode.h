@@ -176,43 +176,88 @@ detect_response_type(const std::string &raw) {
   return unknown;
 }
 
-size_t
-decode_two_channel_long(const std::string &raw, long &channel1,
-                        long &channel2, responses::ResponseType res)
-{
-  if (detect_response_type(raw) != res) {
-    throw(DecodingException("incorrect response type", raw, res));
+/*!
+ * Returns the corresponding std::string given a responses::ResponseType.
+ */
+std::string
+response_type_to_string(responses::ResponseType res) {
+  switch (res) {
+    case motor_amps: return "motor_amps";
+    case analog_input: return "analog_input";
+    case battery_amps: return "battery_amps";
+    case brushless_motor_speed_rpm: return "brushless_motor_speed_rpm";
+    case brushless_motor_speed_percent:
+      return "brushless_motor_speed_percent";
+    case encoder_count_absolute: return "encoder_count_absolute";
+    case brushless_encoder_count_absolute:
+      return "brushless_encoder_count_absolute";
+    case brushless_encoder_count_relative:
+      return "brushless_encoder_count_relative";
+    case internal_analog: return "internal_analog";
+    case internal_pulse: return "internal_pulse";
+    case internal_serial: return "internal_serial";
+    case encoder_count_relative: return "encoder_count_relative";
+    case digital_inputs: return "digital_inputs";
+    case individual_digital_inputs: return "individual_digital_inputs";
+    case digital_output_status: return "digital_output_status";
+    case closed_loop_error: return "closed_loop_error";
+    case feedback_in: return "feedback_in";
+    case fault_flag: return "fault_flag";
+    case firmware_id: return "firmware_id";
+    case status_flag: return "status_flag";
+    case lock_status: return "lock_status";
+    case motor_command_applied: return "motor_command_applied";
+    case motor_power_output_applied: return "motor_power_output_applied";
+    case pulse_input: return "pulse_input";
+    case encoder_speed_rpm: return "encoder_speed_rpm";
+    case encoder_speed_relative: return "encoder_speed_relative";
+    case temperature: return "temperature";
+    case read_time: return "read_time";
+    case control_unit_type_and_controller_model:
+      return "control_unit_type_and_controller_model";
+    case volts: return "volts";
+    case user_variable: return "user_variable";
+    case unknown: return "unknown";
+    default: break;
   }
-  std::vector<std::string> strs;
-  boost::split(strs, raw, boost::is_any_of("=:"));
-  if (strs.size() < 2 || strs.size() > 3) {
-    throw(DecodingException("the format is invalid", raw, res));
-  }
-  channel1 = atol(strs[1].c_str());
-  if (strs.size() == 3) { // There was two channels
-    channel2 = atol(strs[2].c_str());
-    return 2;
-  } else {
-    channel2 = 0;
-    return 1;
-  }
+  return "unknown";
 }
 
-void
-decode_one_channel_long(const std::string &raw, long &channel1,
-                        responses::ResponseType res)
-{
-  if (detect_response_type(raw) != res) {
-    throw(DecodingException("incorrect response type", raw, res));
-  }
-  std::vector<std::string> strs;
-  boost::split(strs, raw, boost::is_any_of("=:"));
-  if (strs.size() < 2) {
-    throw(DecodingException("the format is invalid", raw, res));
-  }
-  channel1 = atol(strs[1].c_str());
-}
+/*!
+ * Exception called when a problem occurs while parsing some mdc2250 response.
+ */
+class DecodingException : public std::exception {
+  const std::string e_what_;
+  const std::string raw_;
+  const responses::ResponseType res_;
+public:
+  DecodingException(const std::string &e_what = "",
+                    const std::string &raw = "",
+                    responses::ResponseType res = responses::unknown)
+  : e_what_(e_what), raw_(raw), res_(res) {}
+  ~DecodingException() throw() {}
 
+  virtual const char * what() const throw() {
+    std::stringstream ss;
+    ss << "Failed to decode `" << this->raw_ << "` as a ";
+    ss << response_type_to_string(this->res_) << ": " << this->e_what_;
+    return ss.str().c_str();
+  }
+};
+
+/*
+ * Decodes any response from the MDC2250 into a list of longs.
+ * 
+ * \params raw The raw data from the motor controller.
+ * \params channels A std::vector of longs that can vary in length based on 
+ * the response and motor controller.  Many will contain 1 or 2, but some have 
+ * many (like Read Analog Inputs).  See the mdc2250 manual for more 
+ * information reguarding query responses.
+ * 
+ * \returns size_t The number of elements in channels.
+ * 
+ * \throws mdc2250::DecodingException
+ */
 size_t
 decode_generic_response(const std::string &raw, std::vector<long> &channels) {
   responses::ResponseType res = detect_response_type(raw);
@@ -230,233 +275,6 @@ decode_generic_response(const std::string &raw, std::vector<long> &channels) {
     channels.push_back(atol((*it).c_str()));
   }
   return channels.size();
-}
-
-/*
- * Decodes a motor amps response.
- * 
- * \params raw string of raw data from the motor controller.
- * \params channel1 value of channel 1
- * \params channel2 value of channel 2
- * 
- * \returns size_t 2 if two channels, 1 if one channel
- */
-size_t
-decode_motor_amps(const std::string &raw, long &channel1, long &channel2) {
-  responses::ResponseType res = motor_amps;
-  return decode_two_channel_long(raw, channel1, channel2, res);
-}
-
-/*
- * Decodes a analog input response.
- * 
- * \params raw string of raw data from the motor controller.
- * \params channels std::vector<long> of analog input values for each channel
- */
-void
-decode_analog_input(const std::string &raw, std::vector<long> &channels) {
-  responses::ResponseType res = analog_input;
-  if (detect_response_type(raw) != res) {
-    throw(DecodingException("incorrect response type", raw, res));
-  }
-  std::vector<std::string> strs;
-  boost::split(strs, raw, boost::is_any_of("=:"));
-  if (strs.size() < 2) {
-    throw(DecodingException("the format is invalid", raw, res));
-  }
-  strs.erase(0); // Erase the stuff before the '='
-  std::vector<std::string>::iterator it;
-  for (it = strs.begin(); it != strs.end(); ++it) {
-    channels.push_back(atol((*it).c_str()));
-  }
-}
-
-/*
- * Decodes a battery amps response.
- * 
- * \params raw string of raw data from the motor controller.
- * \params channel1 value of channel 1
- * \params channel2 value of channel 2
- * 
- * \returns size_t 2 if two channels, 1 if one channel
- */
-size_t
-decode_battery_amps(const std::string &raw, long &channel1, long &channel2) {
-  responses::ResponseType res = battery_amps;
-  return decode_two_channel_long(raw, channel1, channel2, res);
-}
-
-void
-decode_brushless_motor_speed_rpm(const std::string &raw, long &channel) {
-  responses::ResponseType res = brushless_motor_speed_rpm;
-  decode_one_channel_long(raw, channel, res);
-}
-
-void
-decode_brushless_motor_speed_percent(const std::string &raw, long &channel) {
-  responses::ResponseType res = brushless_motor_speed_percent;
-  decode_one_channel_long(raw, channel, res);
-}
-
-size_t
-decode_encoder_count_absolute(const std::string &raw, long &channel1,
-                              long &channel2)
-{
-  responses::ResponseType res = encoder_count_absolute;
-  return decode_two_channel_long(raw, channel1, channel2, res);
-}
-
-void
-decode_brushless_encoder_count_absolute(const std::string &raw, long &channel)
-{
-  responses::ResponseType res = brushless_encoder_count_absolute;
-  decode_one_channel_long(raw, channel, res);
-}
-
-void
-decode_brushless_encoder_count_relative(const std::string &raw, long &channel)
-{
-  responses::ResponseType res = brushless_encoder_count_relative;
-  decode_one_channel_long(raw, channel, res);
-}
-
-void
-decode_internal_analog(const std::string &raw) {
-  responses::ResponseType res = internal_analog;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_internal_pulse(const std::string &raw) {
-  responses::ResponseType res = internal_pulse;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_internal_serial(const std::string &raw) {
-  responses::ResponseType res = internal_serial;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_encoder_count_relative(const std::string &raw) {
-  responses::ResponseType res = encoder_count_relative;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_digital_inputs(const std::string &raw) {
-  responses::ResponseType res = digital_inputs;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_individual_digital_inputs(const std::string &raw) {
-  responses::ResponseType res = individual_digital_inputs;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_digital_output_status(const std::string &raw) {
-  responses::ResponseType res = digital_output_status;
-  throw(DecodingException("not implemented yet", raw, res));
-  
-}
-
-void
-decode_closed_loop_error(const std::string &raw) {
-  responses::ResponseType res = closed_loop_error;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_feedback_in(const std::string &raw) {
-  responses::ResponseType res = feedback_in;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_fault_flag(const std::string &raw) {
-  responses::ResponseType res = fault_flag;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_firmware_id(const std::string &raw) {
-  responses::ResponseType res = firmware_id;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_status_flag(const std::string &raw) {
-  responses::ResponseType res = status_flag;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_lock_status(const std::string &raw) {
-  responses::ResponseType res = lock_status;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_motor_command_applied(const std::string &raw) {
-  responses::ResponseType res = motor_command_applied;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_motor_power_output_applied(const std::string &raw) {
-  responses::ResponseType res = motor_power_output_applied;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_pulse_input(const std::string &raw) {
-  responses::ResponseType res = pulse_input;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_encoder_speed_rpm(const std::string &raw) {
-  responses::ResponseType res = encoder_speed_rpm;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_encoder_speed_relative(const std::string &raw) {
-  responses::ResponseType res = encoder_speed_relative;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_temperature(const std::string &raw) {
-  responses::ResponseType res = temperature;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_read_time(const std::string &raw) {
-  responses::ResponseType res = read_time;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_control_unit_type_and_controller_model(const std::string &raw) {
-  responses::ResponseType res = control_unit_type_and_controller_model;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_volts(const std::string &raw) {
-  responses::ResponseType res = volts;
-  throw(DecodingException("not implemented yet", raw, res));
-}
-
-void
-decode_user_variable(const std::string &raw) {
-  responses::ResponseType res = user_variable;
-  throw(DecodingException("not implemented yet", raw, res));
 }
 
 } // mdc2250 namespace
