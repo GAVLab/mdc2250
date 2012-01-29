@@ -165,7 +165,9 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
 
 void MDC2250::disconnect() {
   // E-stop
-  this->serial_port_.write("!EX\r");
+  if (this->serial_port_.isOpen()) {
+    this->serial_port_.write("!EX\r");
+  }
   this->listener_.stopListening();
   this->connected_ = false;
 }
@@ -313,14 +315,12 @@ MDC2250::setTelemetry(std::string telemetry_queries,
     std::stringstream ss;
     ss << "In setTelemetry, period must be greater than 0, given: ";
     ss << period;
-    // throw(std::invalid_argument(ss.str()));
-    std::cout << ss.str() << std::endl;
-    return;
+    throw(std::invalid_argument(ss.str()));
   }
   // Remove old filters
   {
     std::vector<serial::FilterPtr>::iterator i;
-    for (i == telemetry_filters_.begin(); i != telemetry_filters_.end(); i++)
+    for (i = telemetry_filters_.begin(); i != telemetry_filters_.end(); i++)
     {
       this->listener_.removeFilter((*i));
     }
@@ -335,6 +335,11 @@ MDC2250::setTelemetry(std::string telemetry_queries,
     match = (*it)+"=";
     if (!issueQuery(cmd, SerialListener::startsWith(match), res, fail_why)) {
       // Something went wrong
+      std::vector<serial::FilterPtr>::iterator i;
+      for (i = telemetry_filters_.begin(); i != telemetry_filters_.end(); i++)
+      {
+        this->listener_.removeFilter((*i));
+      }
       telemetry_filters_.clear();
       this->serial_port_.write("# C\r");
       throw(CommandFailedException("setTelemetry", fail_why));
@@ -348,9 +353,8 @@ MDC2250::setTelemetry(std::string telemetry_queries,
       // Not a filter for it yet
       key.push_back((*it));
       // Add a fitler for it
-      FilterPtr filt =
-        listener_.createFilter(SerialListener::startsWith((*it)), callback);
-      telemetry_filters_.push_back(filt);
+      telemetry_filters_.push_back(
+        listener_.createFilter(SerialListener::startsWith((*it)), callback));
     }
   }
   // Now that all of the queries have run once and filters have been made
