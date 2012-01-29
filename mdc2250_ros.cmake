@@ -18,12 +18,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # Use clang if available
-# IF(EXISTS /usr/bin/clang)
-#   set(CMAKE_CXX_COMPILER /usr/bin/clang++)
-#   set(CMAKE_OSX_DEPLOYMENT_TARGET "")
-#   set(CMAKE_CXX_FLAGS "-ferror-limit=5")
-#   set(CMAKE_BUILD_TYPE Debug)
-# ENDIF(EXISTS /usr/bin/clang)
+IF(EXISTS /usr/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "")
+  set(CMAKE_CXX_FLAGS "-ferror-limit=5")
+  set(CMAKE_BUILD_TYPE Debug)
+ENDIF(EXISTS /usr/bin/clang)
 
 include_directories(include)
 

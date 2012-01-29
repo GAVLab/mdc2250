@@ -36,8 +36,8 @@
  * 
  */
 
-#ifndef MDC2250_H
-#define MDC2250_H
+#ifndef MDC2250_DECODE_H
+#define MDC2250_DECODE_H
 
 // Standard Library Headers
 #include <string>
@@ -92,23 +92,11 @@ namespace queries {
   } QueryType;
 } // queries namespace
 
-using queries;
+using namespace queries;
 
 bool
 starts_with(const std::string str, const std::string prefix) {
   return str.substr(0,prefix.length()) == prefix;
-}
-
-bool
-contains(const std::string str, const std::string substr) {
-  return str.find(substr) != std::string::npos;
-}
-
-void
-split(const std::string str, const std::string &delimeter, 
-      std::vector<std::string> &strs)
-{
-  boost::split(strs, str, delimeter);
 }
 
 QueryType
@@ -270,7 +258,7 @@ decode_generic_response(const std::string &raw, std::vector<long> &channels) {
   if (strs.size() < 2) {
     throw(DecodingException("the format is invalid", raw, res));
   }
-  strs.erase(0); // Erase the stuff before the '='
+  strs.erase(strs.begin()); // Erase the stuff before the '='
   std::vector<std::string>::iterator it;
   for (it = strs.begin(); it != strs.end(); ++it) {
     channels.push_back(atol((*it).c_str()));
