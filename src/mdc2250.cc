@@ -167,6 +167,9 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
 }
 
 void MDC2250::disconnect() {
+  if (this->connected_ == false) {
+    return;
+  }
   // E-stop
   if (this->serial_port_.isOpen()) {
     this->serial_port_.write("!EX\r");

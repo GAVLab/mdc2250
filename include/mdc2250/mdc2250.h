@@ -355,6 +355,8 @@ public:
   void
   setExceptionHandler (ExceptionCallback exception_handler) {
     this->handle_exc = exception_handler;
+    // Reset the listener's exception handler
+    this->listener_.setExceptionHandler(this->handle_exc);
   }
 
 private:
