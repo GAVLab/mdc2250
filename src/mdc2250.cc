@@ -63,7 +63,7 @@ MDC2250::MDC2250(bool debug_mode) {
   // Set default callbacks
   this->handle_exc = defaultExceptionCallback;
   this->info = defaultInfoCallback;
-  cmd_time = 1000; // Default to 15 ms
+  cmd_time = 200; // Default to 15 ms
   this->debug_mode_ = debug_mode;
   if (this->debug_mode_) {
     this->listener_.setDefaultHandler(unparsedMessages);
