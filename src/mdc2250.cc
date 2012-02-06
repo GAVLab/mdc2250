@@ -335,6 +335,8 @@ MDC2250::setTelemetry(std::string telemetry_queries,
   // Run each query once, in order
   std::vector<std::string>::iterator it;
   for (it = queries.begin(); it != queries.end(); ++it) {
+    // Wait to ensure we don't overload the mc
+    this->listener_.sleep(100);
     // Issue the query once
     std::string cmd, match, res, fail_why;
     cmd = "?"+(*it);

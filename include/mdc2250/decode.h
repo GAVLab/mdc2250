@@ -100,6 +100,10 @@ starts_with(const std::string str, const std::string prefix) {
 queries::QueryType
 detect_response_type(const std::string &raw) {
   using namespace queries;
+  if (raw.empty()) {
+    std::cerr << "In detect_response_type: Got an empty string." << std::endl;
+    return unknown;
+  }
   switch(raw[0]) {
     case 'A':
       if (starts_with(raw, "A=")) return motor_amps;
