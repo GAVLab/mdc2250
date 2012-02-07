@@ -76,7 +76,9 @@ MDC2250::MDC2250(bool debug_mode) {
 }
 
 MDC2250::~MDC2250() {
-  this->disconnect();
+  if (this->connected_) {
+    this->disconnect();
+  }
 }
 
 void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
