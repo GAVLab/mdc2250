@@ -59,7 +59,7 @@ inline void tokenizer(const std::string &data,
 
 /***** MDC2250 Class Functions *****/
 
-MDC2250::MDC2250(bool debug_mode) {
+MDC2250::MDC2250(bool debug_mode) : listener_(1) {
   // Set default callbacks
   this->handle_exc = defaultExceptionCallback;
   this->info = defaultInfoCallback;
