@@ -89,7 +89,8 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
     // Setup and open serial port
     this->serial_port_.setPort(port_);
     this->serial_port_.setBaudrate(115200);
-    this->serial_port_.setTimeout(100);
+    serial::Timeout to = serial::Timeout::simpleTimeout(100);
+    this->serial_port_.setTimeout(to);
     this->serial_port_.open();
 
     // Setup filters
