@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 2.4.6)
+
+if(COMMAND cmake_policy)
+  cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 project(mdc2250)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -51,6 +56,6 @@ install(FILES include/mdc2250/mdc2250.h include/mdc2250/decode.h
   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/mdc2250)
 
 ## Tests
-if(CATKIN_ENABLE_TESTING)
-    add_subdirectory(tests)
-endif()
+# if(CATKIN_ENABLE_TESTING)
+#     add_subdirectory(tests)
+# endif()
