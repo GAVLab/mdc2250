@@ -102,8 +102,12 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
     throw(ConnectionFailedException(e.what()));
   }
 
+  // Clear E-stop
+  if (this->serial_port_.isOpen()) {
+    this->serial_port_.write("!MG\r");
+  }
   // Reset the controller to ensure clean setup
-  this->reset();
+  // this->reset();
   this->connected_ = true;
 
   // Ping the controller for presence
