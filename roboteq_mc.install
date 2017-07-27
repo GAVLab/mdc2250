@@ -1,0 +1,4 @@
+- git: {local-name: serial, uri: 'git@gitlab.is4s-auburn.com:common/serial.git', version: v1.2.1}
+- git: {local-name: serial_utils, uri: 'git@gitlab.is4s-auburn.com:common/serial_utils.git', version: master}
+- git: {local-name: roboteq_mc, uri: 'git@gitlab.is4s-auburn.com:common/roboteq_mc.git', version: master}
+

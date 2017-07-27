@@ -1,0 +1,33 @@
+<package>
+  <name>mdc2250</name>
+  <version>0.0.0</version>
+
+  <description>
+
+     mdc2250
+
+  </description>
+
+  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
+
+  <author email="wjwwood@gmail.com">William Woodall</author>
+
+  <license>BSD</license>
+  <url>http://ros.org/wiki/mdc2250</url>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <build_depend>serial</build_depend>
+  <build_depend>serial_utils</build_depend>
+  
+  <run_depend>serial</run_depend>
+  <run_depend>serial_utils</run_depend>
+  
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lmdc2250"/>
+  </export>
+
+</package>
+
+

@@ -102,8 +102,12 @@ void MDC2250::connect(std::string port, size_t watchdog_time, bool echo) {
     throw(ConnectionFailedException(e.what()));
   }
 
+  // Clear E-stop
+  if (this->serial_port_.isOpen()) {
+    this->serial_port_.write("!MG\r");
+  }
   // Reset the controller to ensure clean setup
-  this->reset();
+  // this->reset();
   this->connected_ = true;
 
   // Ping the controller for presence
@@ -227,6 +231,75 @@ bool MDC2250::issueCommand(const std::string &command,
   return true;
 }
 
+void MDC2250::commandMaxAcceleration( const uint8_t channel, 
+                                      const uint32_t rpmPerSec)
+{
+  if (rpmPerSec/10 >500000)
+  {
+    // 0.1*rpmPerSec must be > 0 and < 500000
+    std::stringstream ss;
+    ss << "In commandMaxAcceleration, rpmPerSec must be > 0 and < 5,000,000, given: ";
+    ss << rpmPerSec;
+    throw(std::invalid_argument(ss.str()));
+  }
+
+  // Create command
+  std::stringstream ss;
+  ss << "!AC " << channel << " " << rpmPerSec/10;
+  // Issue command
+  std::string fail_why;
+  if (!this->issueCommand(ss.str(), fail_why)) {
+    // Something went wrong
+    throw(CommandFailedException("commandMaxAcceleration", fail_why));
+  }
+}
+
+void MDC2250::commandMaxDecceleration(const uint8_t channel, 
+                                      const uint32_t rpmPerSec)
+{
+  if (rpmPerSec/10 >500000)
+  {
+    // 0.1*rpmPerSec must be > 0 and < 500000
+    std::stringstream ss;              
+    ss << "In commandMaxDecceleration, rpmPerSec must be > 0 and < 5,000,000, given: ";
+    ss << rpmPerSec;
+    throw(std::invalid_argument(ss.str()));
+  }
+
+  // Create command
+  std::stringstream ss;
+  ss << "!DC " << channel << " " << rpmPerSec/10;
+  // Issue command
+  std::string fail_why;
+  if (!this->issueCommand(ss.str(), fail_why)) {
+    // Something went wrong
+    throw(CommandFailedException("commandMaxDecceleration", fail_why));
+  }
+}
+
+void MDC2250::commandMaxRpm(const uint8_t channel, const uint16_t maxRpm)
+{
+  if (maxRpm < 10)
+  {
+    std::stringstream ss;
+    ss << "In commandMaxRpm, maxRpm must be > 10, given: ";
+    ss << maxRpm;
+    throw(std::invalid_argument(ss.str()));
+  }
+
+  // Create command
+  std::stringstream ss;
+  ss << "^MXRPM " << channel << " " << maxRpm;
+  // Issue command
+  std::string fail_why;
+  if (!this->issueCommand(ss.str(), fail_why)) {
+    // Something went wrong
+    throw(CommandFailedException("commandMaxRpm", fail_why));
+  }
+
+}
+
+
 bool MDC2250::ping() {
   this->serial_port_.write("\x05");
   // If the wait command == "", then no response was heard
@@ -319,10 +392,10 @@ MDC2250::setTelemetry(std::string telemetry_queries,
     ss << "queries separated by commas, given: " << telemetry_queries;
     throw(std::invalid_argument(ss.str()));
   }
-  if (period == 0) {
-    // period must be greater than 0
+  if ((period <= 0) || (period > 32000)) {
+    // period must be 0 < p < 32000 msec
     std::stringstream ss;
-    ss << "In setTelemetry, period must be greater than 0, given: ";
+    ss << "In setTelemetry, period must be > 0 and < 32000, given: ";
     ss << period;
     throw(std::invalid_argument(ss.str()));
   }

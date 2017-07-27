@@ -151,6 +151,50 @@ public:
   bool issueCommand(const std::string &command, std::string &failure_reason);
 
   /*!
+   * Sets the Encoder PPR
+   * 
+   * \param channel uint8_t Channel to apply setting to 
+   * \param ppr int16_t PPR of the encoder
+   * 
+   * \throws std::invalid_argument Invalid input param.
+   * \throws CommandFailedException Command sent and failed.
+   */
+  void commandEncoderPpr( const uint8_t channel, const int16_t ppr);
+
+  /*!
+   * Sets the Motor Max RPM
+   * 
+   * \param channel uint8_t Channel to apply setting to 
+   * \param ppr int16_t Max RPM to set
+   * 
+   * \throws std::invalid_argument Invalid input param.
+   * \throws CommandFailedException Command sent and failed.
+   */
+  void commandMaxRpm( const uint8_t channel, const uint16_t maxRpm);
+
+  /*!
+   * Sets the Motor Max Acceleration
+   * 
+   * \param channel uint8_t Channel to apply setting to 
+   * \param ppr int16_t Max acceleration to set in RPM/sec
+   * 
+   * \throws std::invalid_argument Invalid input param.
+   * \throws CommandFailedException Command sent and failed.
+   */
+  void commandMaxAcceleration(const uint8_t channel, const uint32_t rpmPerSec);
+
+  /*!
+   * Sets the Motor Max Decceleration
+   * 
+   * \param channel uint8_t Channel to apply setting to 
+   * \param ppr int16_t Max decceleration to set in RPM/sec
+   * 
+   * \throws std::invalid_argument Invalid input param.
+   * \throws CommandFailedException Command sent and failed.
+   */
+  void commandMaxDecceleration( const uint8_t channel, const uint32_t rpmPerSec);
+
+  /*!
    * Sends an ASCII QRY to the controller to check for its presence.
    * 
    * \return bool true for success, false for failure.

@@ -1,5 +1,5 @@
 /*!
- * \file mdc2250/mdc2250.h
+ * \file mdc2250/decode.h
  * \author William Woodall <wjwwood@gmail.com>
  * \version 0.1
  *
