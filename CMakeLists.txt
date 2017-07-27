@@ -6,8 +6,6 @@ endif(COMMAND cmake_policy)
 
 project(mdc2250)
 
-
-
 find_package(catkin REQUIRED COMPONENTS
   serial
   serial_utils
@@ -58,7 +56,7 @@ install(TARGETS ${PROJECT_NAME}
 install(FILES include/mdc2250/mdc2250.h 
               include/mdc2250/decode.h 
               include/mdc2250/fault_flags.h
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/mdc2250)
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/mdc2250)
 
 ## Tests
 # if(CATKIN_ENABLE_TESTING)
